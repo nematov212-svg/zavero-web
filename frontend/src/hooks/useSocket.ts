@@ -6,8 +6,12 @@ export function useSocket(isDirector: boolean = false) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // In dev, Vite proxies /socket.io to backend localhost:5001
-    const socket = io({
+    const rawBase = import.meta.env.VITE_API_URL || '';
+    const socketHost = rawBase
+      ? (rawBase.startsWith('http') ? rawBase : `https://${rawBase}`)
+      : (typeof window !== 'undefined' && window.location.hostname.includes('render.com') ? 'https://zavero-backend.onrender.com' : undefined);
+
+    const socket = io(socketHost, {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,

@@ -1,4 +1,7 @@
-const BASE_URL = import.meta.env.VITE_API_URL || '';
+const rawBase = import.meta.env.VITE_API_URL || '';
+const BASE_URL = rawBase
+  ? (rawBase.startsWith('http') ? rawBase : `https://${rawBase}`)
+  : (typeof window !== 'undefined' && window.location.hostname.includes('render.com') ? 'https://zavero-backend.onrender.com' : '');
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | undefined>;
