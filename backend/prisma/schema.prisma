@@ -1,0 +1,124 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("DIRECTOR")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Cafe {
+  id           String         @id @default(cuid())
+  name         String
+  ownerName    String
+  phone        String
+  city         String
+  address      String
+  status       String         @default("ACTIVE") // ACTIVE, INACTIVE
+  apiKey       String         @unique @default(uuid())
+  activeTables Int            @default(12)
+  logoUrl      String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  employees    Employee[]
+  customers    Customer[]
+  orders       Order[]
+  notifications Notification[]
+
+  @@map("cafes")
+}
+
+model Employee {
+  id                String   @id @default(cuid())
+  cafeId            String
+  cafe              Cafe     @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  name              String
+  role              String   @default("Ofitsiant") // Ofitsiant, Oshpaz, Barista, Kassir, Administrator
+  phone             String
+  ordersCount       Int      @default(0)
+  closedOrdersCount Int      @default(0)
+  salesAmount       Float    @default(0)
+  attendanceStatus  String   @default("Faol ishda") // Faol ishda, Tanaffusda, Ish tugagan
+  rating            Float    @default(5.0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  orders            Order[]
+
+  @@map("employees")
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  cafeId      String
+  cafe        Cafe     @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  name        String
+  phone       String
+  visitsCount Int      @default(1)
+  totalSpent  Float    @default(0)
+  lastVisit   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("customers")
+}
+
+model Order {
+  id            String    @id @default(cuid())
+  cafeId        String
+  cafe          Cafe      @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  orderNumber   String
+  tableNumber   Int
+  waiterId      String?
+  waiter        Employee? @relation(fields: [waiterId], references: [id], onDelete: SetNull)
+  status        String    @default("PAID") // PENDING, PREPARING, SERVED, PAID, CANCELLED
+  totalAmount   Float
+  items         Json
+  paymentMethod String    @default("CARD") // CARD, CASH, QR, CLICK, PAYME
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("orders")
+}
+
+model Lead {
+  id           String         @id @default(cuid())
+  name         String
+  phone        String
+  businessName String
+  city         String
+  message      String?
+  status       String         @default("new") // new, contacted, converted, rejected
+  notes        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  notifications Notification[]
+
+  @@map("leads")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  message   String
+  type      String   @default("NEW_LEAD") // NEW_LEAD, NEW_CAFE, SYSTEM
+  isRead    Boolean  @default(false)
+  leadId    String?
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  cafeId    String?
+  cafe      Cafe?    @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
