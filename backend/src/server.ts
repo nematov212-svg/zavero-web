@@ -21,10 +21,11 @@ const startServer = async () => {
     // Initialize Telegram Notification Bot
     await TelegramService.init();
 
-    server.listen(ENV.PORT, () => {
-      console.log(`🚀 Zavero Backend running on http://localhost:${ENV.PORT}`);
-      console.log(`📡 WebSocket ready on port ${ENV.PORT}`);
-      console.log(`📊 Health check: http://localhost:${ENV.PORT}/api/health`);
+    const port = Number(ENV.PORT) || 5001;
+    server.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Zavero Backend running on port ${port} (0.0.0.0)`);
+      console.log(`📡 WebSocket ready on port ${port}`);
+      console.log(`📊 Health check: http://localhost:${port}/api/health`);
     });
 
     const shutdown = async () => {

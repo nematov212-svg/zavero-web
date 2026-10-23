@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const ENV = {
-  PORT: process.env.PORT || 5001,
+  PORT: process.env.PORT ? parseInt(process.env.PORT, 10) : 5001,
   DATABASE_URL: process.env.DATABASE_URL || 'postgresql://mirzobek@localhost:5433/zavero_db?schema=public',
   JWT_SECRET: process.env.JWT_SECRET || 'zavero_super_secret_jwt_key_2026_production',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
