@@ -13,13 +13,15 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
   showTitle = true,
 }) => {
   const scrollToContact = (planName: string) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('zavero-select-plan', { detail: { plan: planName } }));
+    }
     const el = document.getElementById('contact-form') || document.getElementById('boglanish');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
-      // Pre-fill or notify message area if element exists
       const msgInput = document.querySelector('textarea[name="message"]') as HTMLTextAreaElement | null;
       if (msgInput) {
-        msgInput.value = `Salom! Men "${planName}" tarifi bo'yicha ulanmoqchiman.`;
+        msgInput.value = `Salom! Men "${planName}" bo'yicha ulanmoqchiman.`;
       }
     }
   };
@@ -88,23 +90,23 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
       ],
     },
     {
-      name: 'Cheksiz Tarif (Umrbod)',
-      badge: 'Lifetime / Cheksiz',
+      name: '1 Yillik Tarif',
+      badge: 'Eng Manfaatli ⭐',
       badgeColor: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/40',
-      description: 'Bir marta to\'laysiz va oylik to\'lovlarsiz umrbod foydalanasiz',
-      price: '2,200,000',
-      period: 'so\'m (Bir martalik to\'lov)',
-      originalPrice: null,
-      discountText: 'Oylik to\'lov yo\'q • Umrbod litsenziya',
+      description: 'Bir marta to\'laysiz va 1 yil to\'lovlarsiz to\'liq foydalanasiz',
+      price: '2,000,000',
+      period: 'so\'m / 1 yil',
+      originalPrice: '2,400,000',
+      discountText: '400,000 so\'m Katta Chegirma',
       popular: false,
       features: [
-        'Bir umrga cheksiz litsenziya',
-        'Oylik yoki yillik to\'lovlarsiz',
-        'Barcha kelajakdagi yangilanishlar bepul',
-        'Cheksiz qurilmalar va ofitsiantlar',
+        '1 yilga to\'liq litsenziya',
+        'Oylik to\'lovlarsiz 1 yil to\'liq foydalanish',
+        'Cheksiz ofitsiant va kassa qurilmalari',
+        'Oshxona ekrani (KDS) + Bar integratsiyasi',
         'Barcha to\'lov tizimlari (Click, Payme, Kartalar)',
-        'VIP darajadagi 24/7 ustuvor texnik servis',
-        'Joyiga chiqqan holda bepul o\'rnatish',
+        'VIP 24/7 ustuvor texnik servis',
+        'Joyiga chiqqan holda bepul o\'rnatish va o\'qitish',
       ],
     },
   ];

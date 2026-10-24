@@ -5,13 +5,18 @@ import { TelegramService } from './telegram.service';
 
 export class LeadService {
   static async createLead(data: CreateLeadInput) {
+    const userMessage = data.message?.trim() || '';
+    const storedMessage = data.plan
+      ? (userMessage ? `[Tarif: ${data.plan}] ${userMessage}` : `[Tarif: ${data.plan}]`)
+      : (userMessage || null);
+
     const lead = await prisma.lead.create({
       data: {
         name: data.name.trim(),
         phone: data.phone.trim(),
         businessName: data.businessName.trim(),
         city: data.city.trim(),
-        message: data.message?.trim() || null,
+        message: storedMessage,
         status: 'new',
       },
     });
@@ -20,20 +25,24 @@ export class LeadService {
     const notification = await prisma.notification.create({
       data: {
         title: '🔔 Yangi mijoz',
-        message: `${lead.name} (${lead.businessName}) siz bilan bog'lanishni so'radi. Tel: ${lead.phone}`,
+        message: `${lead.name} (${lead.businessName}) ${data.plan ? `[${data.plan}] ` : ''}siz bilan bog'lanishni so'radi. Tel: ${lead.phone}`,
         type: 'NEW_LEAD',
         leadId: lead.id,
       },
     });
 
-    // Send instant Telegram message to bot
-    TelegramService.sendNewLeadAlert(lead).catch((err) => {
+    // Send instant Telegram message to bot with plan
+    TelegramService.sendNewLeadAlert({
+      ...lead,
+      plan: data.plan || null,
+      message: userMessage || null,
+    }).catch((err) => {
       console.error('Failed to dispatch telegram notification:', err);
     });
 
     // Real-time broadcast
     notifyNewLead({
-      lead,
+      lead: { ...lead, plan: data.plan },
       notification,
     });
 

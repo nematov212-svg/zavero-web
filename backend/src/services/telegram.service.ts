@@ -128,6 +128,7 @@ export class TelegramService {
     phone: string;
     businessName: string;
     city: string;
+    plan?: string | null;
     message?: string | null;
     createdAt?: Date | string;
   }) {
@@ -153,10 +154,11 @@ export class TelegramService {
       `📞 <b>Telefon raqami:</b> <a href="tel:${cleanPhone}">${lead.phone}</a>\n` +
       `🏪 <b>Cafe / Restoran:</b> ${lead.businessName}\n` +
       `📍 <b>Shahar:</b> ${lead.city}\n` +
-      (lead.message ? `💬 <b>Izoh / Tarif:</b> <i>${lead.message}</i>\n` : '') +
+      (lead.plan ? `🏷 <b>Tanlangan Tarif:</b> <b>${lead.plan}</b>\n` : '') +
+      (lead.message ? `💬 <b>Qo'shimcha izoh:</b> <i>${lead.message}</i>\n` : '') +
       `⏰ <b>Kelgan vaqti:</b> ${dateFormatted}\n` +
       `━━━━━━━━━━━━━━━━━━━━\n` +
-      `⚡️ <i>Tezkor qo'ng'iroq qilib, mijozni ulab bering!</i>`;
+      `⚡️ <i>Mijoz bilan darhol bog'laning!</i>`;
 
     console.log(`📢 Sending lead alert to ${this.subscribers.size} telegram subscribers...`);
 

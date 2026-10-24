@@ -15,6 +15,7 @@ export const publicApi = {
     phone: string;
     businessName: string;
     city: string;
+    plan?: string;
     message?: string;
   }) => {
     return request<{ success: boolean; message: string; data: Lead }>('/api/leads', {

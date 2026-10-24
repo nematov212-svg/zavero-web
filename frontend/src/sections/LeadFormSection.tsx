@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Phone, User, Store, MapPin, MessageSquare, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Send, Phone, User, Store, MapPin, MessageSquare, AlertCircle, CheckCircle2, Sparkles, Check, Flame } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { SuccessModal } from '../components/common/SuccessModal';
 import { publicApi } from '../api/publicApi';
@@ -13,6 +13,30 @@ export const LeadFormSection: React.FC = () => {
     city: 'Toshkent',
     message: '',
   });
+
+  const [selectedPlan, setSelectedPlan] = useState<string>('1 Yillik Tarif');
+  const [isPlanPulsing, setIsPlanPulsing] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleSelectPlan = (event: any) => {
+      const plan = event.detail?.plan;
+      if (plan) {
+        setSelectedPlan(plan);
+        setIsPlanPulsing(true);
+        setTimeout(() => setIsPlanPulsing(false), 2200);
+      }
+    };
+
+    window.addEventListener('zavero-select-plan', handleSelectPlan);
+    return () => window.removeEventListener('zavero-select-plan', handleSelectPlan);
+  }, []);
+
+  const availablePlans = [
+    { id: '1 Oylik Tarif', name: '1 Oylik', price: '200,000 so\'m', badge: 'Oylik' },
+    { id: '3 Oylik Tarif', name: '3 Oylik', price: '550,000 so\'m', badge: 'Tejamkor' },
+    { id: '9 Oylik Tarif', name: '9 Oylik', price: '1,500,000 so\'m', badge: '🔥 Ommabop' },
+    { id: '1 Yillik Tarif', name: '1 Yillik', price: '2,000,000 so\'m', badge: '⭐ Eng Manfaatli' },
+  ];
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,6 +84,7 @@ export const LeadFormSection: React.FC = () => {
         phone: formData.phone.trim(),
         businessName: formData.businessName.trim(),
         city: formData.city.trim(),
+        plan: selectedPlan,
         message: formData.message.trim() || undefined,
       });
 
@@ -152,6 +177,56 @@ export const LeadFormSection: React.FC = () => {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Tanlangan Tarif Tanlagich (Interactive Plan Selector) */}
+                <div className={`p-4 rounded-2xl border transition-all duration-300 ${isPlanPulsing
+                  ? 'border-red-500 bg-red-500/10 shadow-lg shadow-red-500/20 scale-[1.01]'
+                  : 'border-gray-200 dark:border-white/10 bg-gray-50/80 dark:bg-white/[0.03]'
+                  }`}>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <label className="text-xs font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-red-500" />
+                      <span>Tanlangan Tarif:</span>
+                    </label>
+                    <span className="text-[11px] font-extrabold text-red-600 dark:text-red-400 bg-red-500/10 px-2.5 py-0.5 rounded-full border border-red-500/20">
+                      {selectedPlan}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {availablePlans.map((p) => {
+                      const isSelected = selectedPlan === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setSelectedPlan(p.id)}
+                          className={`relative p-2.5 rounded-xl border text-left transition-all duration-200 cursor-pointer ${isSelected
+                            ? 'border-red-500 bg-white dark:bg-[#12172A] shadow-md shadow-red-500/15 ring-2 ring-red-500/30'
+                            : 'border-gray-200 dark:border-white/10 hover:border-gray-300 dark:hover:border-white/20 bg-white/70 dark:bg-white/[0.02]'
+                            }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                              {p.badge}
+                            </span>
+                            {isSelected && (
+                              <span className="w-3.5 h-3.5 rounded-full bg-red-500 text-white flex items-center justify-center">
+                                <Check className="w-2.5 h-2.5 stroke-[3]" />
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs font-black text-gray-900 dark:text-white truncate">
+                            {p.name}
+                          </div>
+                          <div className="text-[11px] font-extrabold text-red-600 dark:text-red-400 font-mono mt-0.5">
+                            {p.price}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Ism */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">

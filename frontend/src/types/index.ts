@@ -31,6 +31,7 @@ export interface Lead {
   phone: string;
   businessName: string;
   city: string;
+  plan?: string | null;
   message?: string | null;
   status: 'new' | 'contacted' | 'converted' | 'rejected';
   notes?: string | null;

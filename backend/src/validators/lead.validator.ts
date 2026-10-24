@@ -5,6 +5,7 @@ export const createLeadSchema = z.object({
   phone: z.string().min(7, 'Telefon raqamni to\'g\'ri kiriting').max(25),
   businessName: z.string().min(2, 'Cafe yoki restoran nomi kamida 2 ta belgidan iborat bo\'lishi kerak').max(120),
   city: z.string().min(2, 'Shahar nomini kiriting').max(80),
+  plan: z.string().max(120).optional().nullable(),
   message: z.string().max(1000).optional().nullable(),
 });
 
