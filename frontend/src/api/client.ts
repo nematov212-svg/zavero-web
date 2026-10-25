@@ -1,7 +1,7 @@
 const rawBase = import.meta.env.VITE_API_URL || '';
-const BASE_URL = rawBase
+export const BASE_URL = rawBase
   ? (rawBase.startsWith('http') ? rawBase : `https://${rawBase}`)
-  : (typeof window !== 'undefined' && window.location.hostname.includes('render.com') ? 'https://zavero-backend.onrender.com' : '');
+  : 'https://zavero-backend.onrender.com';
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | undefined>;
@@ -44,8 +44,8 @@ export async function request<T>(endpoint: string, options: FetchOptions = {}): 
   const data = isJson ? await response.json() : await response.text();
 
   if (!response.ok) {
-    const message = (data && typeof data === 'object' && (data as any).message) 
-      ? (data as any).message 
+    const message = (data && typeof data === 'object' && (data as any).message)
+      ? (data as any).message
       : `Xatolik: ${response.status} ${response.statusText}`;
     throw new Error(message);
   }

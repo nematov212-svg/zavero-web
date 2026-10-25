@@ -8,14 +8,15 @@ import { publicApi } from '../api/publicApi';
 export const LeadFormSection: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
-    phone: '+998 ',
+    phone: '',
     businessName: '',
-    city: 'Toshkent',
+    city: '',
     message: '',
   });
 
   const [selectedPlan, setSelectedPlan] = useState<string>('1 Yillik Tarif');
   const [isPlanPulsing, setIsPlanPulsing] = useState<boolean>(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   useEffect(() => {
     const handleSelectPlan = (event: any) => {
@@ -46,25 +47,65 @@ export const LeadFormSection: React.FC = () => {
     businessName: '',
   });
 
-  const validate = () => {
+  const validateField = (field: string, value: string): string => {
+    const trimmed = (value || '').trim();
+    switch (field) {
+      case 'name':
+        if (!trimmed || trimmed.length < 2) {
+          return "Iltimos, ismingizni kiriting!";
+        }
+        return '';
+      case 'phone': {
+        const digits = trimmed.replace(/\D/g, '');
+        if (!digits || (digits.startsWith('998') ? digits.length < 12 : digits.length < 9)) {
+          return "Iltimos, telefon raqamingizni to'liq kiriting (+998 90 123 45 67)!";
+        }
+        return '';
+      }
+      case 'businessName':
+        if (!trimmed || trimmed.length < 2) {
+          return "Iltimos, Cafe yoki Restaurant nomini kiriting!";
+        }
+        return '';
+      case 'city':
+        if (!trimmed || trimmed.length < 2) {
+          return "Iltimos, Shahar yoki Viloyatingizni kiriting!";
+        }
+        return '';
+      default:
+        return '';
+    }
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (submitAttempted) {
+      const fieldError = validateField(field, value);
+      setErrors((prev) => {
+        const updated = { ...prev };
+        if (!fieldError) {
+          delete updated[field];
+        } else {
+          updated[field] = fieldError;
+        }
+        return updated;
+      });
+    }
+  };
+
+  const validateAll = () => {
     const newErrors: Record<string, string> = {};
+    const nameErr = validateField('name', formData.name);
+    if (nameErr) newErrors.name = nameErr;
 
-    if (!formData.name.trim() || formData.name.trim().length < 2) {
-      newErrors.name = 'Iltimos, ismingizni to\'liq kiriting (kamida 2 belgi)';
-    }
+    const phoneErr = validateField('phone', formData.phone);
+    if (phoneErr) newErrors.phone = phoneErr;
 
-    const cleanPhone = formData.phone.replace(/\s+/g, '');
-    if (!cleanPhone || cleanPhone.length < 9 || !cleanPhone.startsWith('+998')) {
-      newErrors.phone = 'Telefon raqamni +998 90 123 45 67 formatida kiriting';
-    }
+    const businessErr = validateField('businessName', formData.businessName);
+    if (businessErr) newErrors.businessName = businessErr;
 
-    if (!formData.businessName.trim() || formData.businessName.trim().length < 2) {
-      newErrors.businessName = 'Cafe yoki restoraningiz nomini kiriting';
-    }
-
-    if (!formData.city.trim()) {
-      newErrors.city = 'Shaharingizni kiriting';
-    }
+    const cityErr = validateField('city', formData.city);
+    if (cityErr) newErrors.city = cityErr;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -72,8 +113,11 @@ export const LeadFormSection: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitAttempted(true);
 
-    if (!validate()) return;
+    if (!validateAll()) {
+      return;
+    }
 
     setIsSubmitting(true);
     setErrors({});
@@ -94,14 +138,15 @@ export const LeadFormSection: React.FC = () => {
           businessName: formData.businessName,
         });
         setIsSuccessModalOpen(true);
-        // Reset form
+        // Reset form completely
         setFormData({
           name: '',
-          phone: '+998 ',
+          phone: '',
           businessName: '',
-          city: 'Toshkent',
+          city: '',
           message: '',
         });
+        setSubmitAttempted(false);
       }
     } catch (err: any) {
       setErrors({
@@ -170,9 +215,16 @@ export const LeadFormSection: React.FC = () => {
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-6 sm:mb-8">Ma'lumotlaringiz xavfsiz saqlanadi va uchinchi shaxslarga berilmaydi.</p>
 
               {errors.submit && (
-                <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3 text-red-600 dark:text-red-400 text-xs">
+                <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center gap-3 text-red-600 dark:text-red-400 text-xs font-bold">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <span>{errors.submit}</span>
+                </div>
+              )}
+
+              {submitAttempted && (errors.name || errors.phone || errors.businessName || errors.city) && (
+                <div className="mb-5 p-3.5 rounded-2xl bg-red-500/10 border-2 border-red-500/30 flex items-center gap-2.5 text-red-600 dark:text-red-400 text-xs font-bold animate-pulse">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+                  <span>Iltimos, ariza yuborish uchun qizil rangda ko'rsatilgan barcha maydonlarni to'ldiring!</span>
                 </div>
               )}
 
@@ -230,78 +282,102 @@ export const LeadFormSection: React.FC = () => {
                 {/* Ism */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Ismingiz <span className="text-red-500">*</span>
+                    Ismingiz <span className="text-red-500 font-bold">*</span>
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <User className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${errors.name ? 'text-red-500' : 'text-gray-400'}`} />
                     <input
                       type="text"
                       placeholder="Masalan: Azizbek"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className={`w-full glass-input pl-10 pr-4 py-3 rounded-xl text-sm ${errors.name ? 'border-red-500/50' : ''
-                        }`}
+                      onChange={(e) => handleFieldChange('name', e.target.value)}
+                      className={`w-full glass-input pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${
+                        errors.name ? '!border-red-500 !ring-2 !ring-red-500/25 bg-red-50/50 dark:bg-red-950/20' : ''
+                      }`}
                     />
                   </div>
-                  {errors.name && <p className="text-[11px] text-red-500 mt-1">{errors.name}</p>}
+                  {errors.name && (
+                    <p className="text-xs font-bold text-red-600 dark:text-red-400 mt-1.5 flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
+                      <span>{errors.name}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Telefon & Cafe Nomi Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Telefon raqamingiz <span className="text-red-500">*</span>
+                      Telefon raqamingiz <span className="text-red-500 font-bold">*</span>
                     </label>
                     <div className="relative">
-                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Phone className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${errors.phone ? 'text-red-500' : 'text-gray-400'}`} />
                       <input
                         type="text"
                         placeholder="+998 90 123 45 67"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className={`w-full glass-input pl-10 pr-4 py-3 rounded-xl text-sm font-mono ${errors.phone ? 'border-red-500/50' : ''
-                          }`}
+                        onChange={(e) => handleFieldChange('phone', e.target.value)}
+                        className={`w-full glass-input pl-10 pr-4 py-3 rounded-xl text-sm font-mono transition-all ${
+                          errors.phone ? '!border-red-500 !ring-2 !ring-red-500/25 bg-red-50/50 dark:bg-red-950/20' : ''
+                        }`}
                       />
                     </div>
-                    {errors.phone && <p className="text-[11px] text-red-500 mt-1">{errors.phone}</p>}
+                    {errors.phone && (
+                      <p className="text-xs font-bold text-red-600 dark:text-red-400 mt-1.5 flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
+                        <span>{errors.phone}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                      Cafe / Restaurant nomi <span className="text-red-500">*</span>
+                      Cafe / Restaurant nomi <span className="text-red-500 font-bold">*</span>
                     </label>
                     <div className="relative">
-                      <Store className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Store className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${errors.businessName ? 'text-red-500' : 'text-gray-400'}`} />
                       <input
                         type="text"
                         placeholder="Masalan: Family Cafe"
                         value={formData.businessName}
-                        onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                        className={`w-full glass-input pl-10 pr-4 py-3 rounded-xl text-sm ${errors.businessName ? 'border-red-500/50' : ''
-                          }`}
+                        onChange={(e) => handleFieldChange('businessName', e.target.value)}
+                        className={`w-full glass-input pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${
+                          errors.businessName ? '!border-red-500 !ring-2 !ring-red-500/25 bg-red-50/50 dark:bg-red-950/20' : ''
+                        }`}
                       />
                     </div>
-                    {errors.businessName && <p className="text-[11px] text-red-500 mt-1">{errors.businessName}</p>}
+                    {errors.businessName && (
+                      <p className="text-xs font-bold text-red-600 dark:text-red-400 mt-1.5 flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
+                        <span>{errors.businessName}</span>
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 {/* Shahar */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    Shahar / Hudud <span className="text-red-500">*</span>
+                    Shahar / Hudud <span className="text-red-500 font-bold">*</span>
                   </label>
                   <div className="relative">
-                    <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <MapPin className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${errors.city ? 'text-red-500' : 'text-gray-400'}`} />
                     <input
                       type="text"
-                      placeholder="Masalan: Toshkent, Samarqand, Farg'ona..."
+                      placeholder="Masalan: Toshkent, Samarqand, Farg'ona, Buxoro..."
                       value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className={`w-full glass-input pl-10 pr-4 py-3 rounded-xl text-sm ${errors.city ? 'border-red-500/50' : ''
-                        }`}
+                      onChange={(e) => handleFieldChange('city', e.target.value)}
+                      className={`w-full glass-input pl-10 pr-4 py-3 rounded-xl text-sm transition-all ${
+                        errors.city ? '!border-red-500 !ring-2 !ring-red-500/25 bg-red-50/50 dark:bg-red-950/20' : ''
+                      }`}
                     />
                   </div>
-                  {errors.city && <p className="text-[11px] text-red-500 mt-1">{errors.city}</p>}
+                  {errors.city && (
+                    <p className="text-xs font-bold text-red-600 dark:text-red-400 mt-1.5 flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0 text-red-500" />
+                      <span>{errors.city}</span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Izoh */}
@@ -327,7 +403,7 @@ export const LeadFormSection: React.FC = () => {
                   size="lg"
                   isLoading={isSubmitting}
                   rightIcon={<Send className="w-4 h-4" />}
-                  className="w-full justify-center py-4 text-base mt-2"
+                  className="w-full justify-center py-4 text-base mt-2 shadow-lg shadow-red-500/20 cursor-pointer"
                 >
                   Bog'lanish
                 </Button>
