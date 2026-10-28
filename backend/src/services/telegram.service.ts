@@ -80,8 +80,8 @@ export class TelegramService {
               await this.sendMessageToChat(
                 chatId,
                 `👋 <b>Assalomu alaykum, ${msg.from?.first_name || 'Hurmatli rahbar'}!</b>\n\n` +
-                  `Siz <b>ZAVERO</b> rasmiy bildirishnoma botiga muvaffaqiyatli ulandingiz! 🚀\n\n` +
-                  `Endi veb-saytingizdan (<b>zavero.uz</b>) mijozlar "Bog'lanish" formasini to'ldirganda, barcha arizalar (ism, telefon raqam, cafe nomi) shu yerga soniyasida yetib keladi. ✅`
+                `Siz <b>ZAVERO</b> rasmiy bildirishnoma botiga muvaffaqiyatli ulandingiz! 🚀\n\n` +
+                `Endi veb-saytingizdan (<b>zavero.uz</b>) mijozlar "Bog'lanish" formasini to'ldirganda, barcha arizalar (ism, telefon raqam, cafe nomi) shu yerga soniyasida yetib keladi. ✅`
               );
             } else if (text === '/start' || text.startsWith('/start')) {
               await this.sendMessageToChat(

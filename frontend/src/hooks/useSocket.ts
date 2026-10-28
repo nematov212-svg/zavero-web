@@ -9,7 +9,7 @@ export function useSocket(isDirector: boolean = false) {
     const rawBase = import.meta.env.VITE_API_URL || '';
     const socketHost = rawBase
       ? (rawBase.startsWith('http') ? rawBase : `https://${rawBase}`)
-      : 'https://zavero-backend.onrender.com';
+      : 'https://zavero-backend-production.up.railway.app';
 
     const socket = io(socketHost, {
       transports: ['websocket', 'polling'],

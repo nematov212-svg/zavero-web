@@ -4,9 +4,10 @@ import { Server as HttpServer } from 'http';
 let ioInstance: SocketIOServer | null = null;
 
 export const initSocket = (httpServer: HttpServer, allowedOrigins: string[]): SocketIOServer => {
+  const isWildcard = allowedOrigins.includes('*');
   ioInstance = new SocketIOServer(httpServer, {
     cors: {
-      origin: allowedOrigins,
+      origin: isWildcard ? true : allowedOrigins,
       methods: ['GET', 'POST', 'PATCH', 'DELETE'],
       credentials: true,
     },

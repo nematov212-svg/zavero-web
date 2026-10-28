@@ -1,7 +1,7 @@
 const rawBase = import.meta.env.VITE_API_URL || '';
 export const BASE_URL = rawBase
   ? (rawBase.startsWith('http') ? rawBase : `https://${rawBase}`)
-  : 'https://zavero-backend.onrender.com';
+  : 'https://zavero-backend-production.up.railway.app';
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | undefined>;
