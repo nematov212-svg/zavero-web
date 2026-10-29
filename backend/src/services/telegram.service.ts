@@ -10,7 +10,7 @@ const DATA_DIR = path.join(__dirname, '../../data');
 const CHATS_FILE = path.join(DATA_DIR, 'telegram_subscribers.json');
 
 export class TelegramService {
-  private static subscribers: Set<string | number> = new Set();
+  private static subscribers: Set<string> = new Set();
   private static lastUpdateId = 0;
   private static pollTimer: NodeJS.Timeout | null = null;
 
@@ -27,7 +27,7 @@ export class TelegramService {
         const raw = fs.readFileSync(CHATS_FILE, 'utf-8');
         const list = JSON.parse(raw);
         if (Array.isArray(list)) {
-          list.forEach((id) => this.subscribers.add(id));
+          list.forEach((id) => this.subscribers.add(String(id).trim()));
         }
       }
 
@@ -36,7 +36,7 @@ export class TelegramService {
       if (envChatId) {
         envChatId.split(',').forEach((id) => {
           const trimmed = id.trim();
-          if (trimmed) this.subscribers.add(trimmed);
+          if (trimmed) this.subscribers.add(String(trimmed));
         });
       }
 
@@ -73,7 +73,7 @@ export class TelegramService {
 
           const msg = update.message || update.channel_post;
           if (msg && msg.chat && msg.chat.id) {
-            const chatId = msg.chat.id;
+            const chatId = String(msg.chat.id);
             const text = (msg.text || '').trim();
 
             if (!this.subscribers.has(chatId)) {
@@ -152,7 +152,7 @@ export class TelegramService {
     if (envChatId) {
       envChatId.split(',').forEach((id) => {
         const trimmed = id.trim();
-        if (trimmed) this.subscribers.add(trimmed);
+        if (trimmed) this.subscribers.add(String(trimmed));
       });
     }
 
