@@ -34,3 +34,4 @@ lerna-debug.log*
 backend/data/*.json
 !backend/data/seeds.json
 !backend/data/telegram_subscribers.json
+*.tsbuildinfo
