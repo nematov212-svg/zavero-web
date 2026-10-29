@@ -9,5 +9,5 @@ export const ENV = {
   CORS_ORIGIN: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:5173', 'http://localhost:3000'],
   NODE_ENV: process.env.NODE_ENV || 'development',
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '8701521409:AAGSj1eWEk_QLIH7eMUKzxxXn5LK0ED38oY',
-  TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID || '',
+  TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID || '8873925517',
 };

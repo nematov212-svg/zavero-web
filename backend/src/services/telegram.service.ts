@@ -3,6 +3,7 @@ import path from 'path';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '8701521409:AAGSj1eWEk_QLIH7eMUKzxxXn5LK0ED38oY';
 const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const DEFAULT_CHAT_ID = '8873925517';
 
 // File path to store registered subscriber chat IDs
 const DATA_DIR = path.join(__dirname, '../../data');
@@ -30,9 +31,13 @@ export class TelegramService {
         }
       }
 
-      // Add default chat_id from env if present
-      if (process.env.TELEGRAM_CHAT_ID) {
-        this.subscribers.add(process.env.TELEGRAM_CHAT_ID.trim());
+      // Add default chat_id from env or fallback
+      const envChatId = process.env.TELEGRAM_CHAT_ID || DEFAULT_CHAT_ID;
+      if (envChatId) {
+        envChatId.split(',').forEach((id) => {
+          const trimmed = id.trim();
+          if (trimmed) this.subscribers.add(trimmed);
+        });
       }
 
       console.log(`🤖 Telegram Bot Service ready. Loaded ${this.subscribers.size} subscribers.`);
@@ -113,6 +118,11 @@ export class TelegramService {
         }),
       });
       const result: any = await response.json();
+      if (!result.ok) {
+        console.error(`❌ Telegram send error to ${chatId}:`, result);
+      } else {
+        console.log(`✅ Telegram alert sent successfully to ${chatId} (msg_id: ${result.result?.message_id})`);
+      }
       return result.ok === true;
     } catch (err) {
       console.error(`Failed to send telegram msg to ${chatId}:`, err);
@@ -135,6 +145,15 @@ export class TelegramService {
     // If no subscribers registered yet, try one immediate poll in case user just pressed /start
     if (this.subscribers.size === 0) {
       await this.pollUpdates();
+    }
+
+    // Ensure default chat ID is always included
+    const envChatId = process.env.TELEGRAM_CHAT_ID || DEFAULT_CHAT_ID;
+    if (envChatId) {
+      envChatId.split(',').forEach((id) => {
+        const trimmed = id.trim();
+        if (trimmed) this.subscribers.add(trimmed);
+      });
     }
 
     const cleanPhone = lead.phone.replace(/[^\d+]/g, '');
